@@ -137,6 +137,7 @@ module.exports = {
                         message: 'Auth successful',
                         role: role.role,
                         token: token,
+                        name: user[0].name
                     });
                 } else {
                     res.status(401).json({
