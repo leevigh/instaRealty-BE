@@ -5,10 +5,11 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 const morgan = require('morgan')
+const cors = require('cors')
 
 
 var users = require('./routes/users');
-// console.log(process.env.MONGODB_URL)
+var rentals = require('./routes/rentals');
 
 mongoose.Promise = Promise;
 
@@ -22,11 +23,13 @@ mongoose.connect('mongodb://localhost:27017/instarealty', {
 
 var app = express();
 
+app.use(cors());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser())
 
 app.use('/api/v1/users', users);
+app.use('/api/v1/rentals', rentals);
 
 module.exports = app;
