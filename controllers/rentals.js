@@ -7,6 +7,15 @@ const cloudinary = require("cloudinary").v2;
 const { cloudinaryConfig } = require("../configs/cloudinary");
 
 module.exports = {
+  getRentals: (req, res, next) => {
+    Rental.find().then(result => res.status(200).json({
+      data: result
+    })).catch(error => {
+      res.status(404).json({
+        message: error.message
+      })
+    })
+  },
   // create rentals
   createRental: async (req, res, next) => {
     let propertyPhotos;
