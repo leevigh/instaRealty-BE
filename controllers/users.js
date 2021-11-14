@@ -138,7 +138,7 @@ module.exports = {
               },
               process.env.JWT_KEY,
               {
-                expiresIn: "1h",
+                expiresIn: "1d",
               }
             );
             const role = jwt.verify(token, process.env.JWT_KEY);
