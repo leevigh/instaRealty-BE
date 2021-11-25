@@ -3,8 +3,13 @@ const User = require("../models/User");
 const Rental = require("../models/Rental");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const exiftool = require("exiftool-vendored").exiftool;
 const cloudinary = require("cloudinary").v2;
 const { cloudinaryConfig } = require("../configs/cloudinary");
+
+const handleError = (err, res) => {
+  res.status(500).contentType('text/plain').end('Oops! Something went wrong')
+}
 
 module.exports = {
   getRentals: (req, res, next) => {
@@ -44,10 +49,33 @@ module.exports = {
     let propertyPhotos;
     if (req.file) {
       console.log("this is file======>", req.file);
-      await cloudinaryConfig;
-      const uploading = await cloudinary.uploader.upload(req.file.path);
-      //   console.log(uploading);
-      propertyPhotos = uploading.secure_url;
+
+      const exif = async () => {
+        console.log(await exiftool.version())
+      }
+
+      // exiftool
+      // .read(req.file.path)
+      // .then(tags => console.log(tags))
+
+      const imageData = await exiftool.read(req.file.path)
+      
+      //exporting the coordinates to be used later to get address string
+      module.exports = {photoGPS: imageData && imageData.GPSPosition ? imageData.GPSPosition : null}
+
+      if(imageData && imageData.GPSPosition) {
+        console.log(imageData.GPSPosition);
+        await cloudinaryConfig;
+        const uploading = await cloudinary.uploader.upload(req.file.path);
+        //   console.log(uploading);
+        propertyPhotos = uploading.secure_url;
+      } else {
+        //code 406 - Not acceptable
+        return res.status(406).json({
+          message: "Photo has no GPS data. Switch on GPS in camera."
+        })
+      }
+
     }
     const rental = new Rental({
       propertyType: req.body.propertyType,

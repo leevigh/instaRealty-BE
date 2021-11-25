@@ -29,12 +29,10 @@ const rentalSchema = mongoose.Schema({
     required: true,
   },
 
-  propertyPhotos: [
-    {
+  propertyPhotos: {
       type: String,
       required: true,
     },
-  ],
 
   rating: {
     type: Number,
