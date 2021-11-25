@@ -4,8 +4,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 module.exports = {
-  register: (req, res, next) => {
-    User.find({ email: req.body.email })
+  register: async (req, res, next) => {
+    await User.find({ email: req.body.email })
       .exec()
       .then((user) => {
         if (user.length >= 1) {
@@ -27,9 +27,10 @@ module.exports = {
               user
                 .save()
                 .then((result) => {
-                  console.log(result);
+                  // console.log(result);
                   res.status(201).json({
                     message: "User created successfully",
+                    result,
                   });
                 })
                 .catch((err) => {
@@ -133,6 +134,7 @@ module.exports = {
             const token = jwt.sign(
               {
                 email: user[0].email,
+                name: user[0].name,
                 id: user[0]._id,
                 role: user[0].role,
               },
