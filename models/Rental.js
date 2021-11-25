@@ -36,6 +36,11 @@ const rentalSchema = mongoose.Schema(
 
     assets: {
       type: String,
+      required: false
+    },
+
+    propertyPhotos: {
+      type: String,
       required: true,
     },
 
@@ -44,12 +49,17 @@ const rentalSchema = mongoose.Schema(
       required: true,
     },
 
-    propertyPhotos: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
+    coordinates: {
+      type: String,
+      required: true
+    },
+
+    // propertyPhotos: [
+    //   {
+    //     type: String,
+    //     required: true,
+    //   },
+    // ],
     landlord: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
