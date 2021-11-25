@@ -3,50 +3,72 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const rentalSchema = mongoose.Schema({
-  propertyType: {
-    type: String,
-    required: false,
+const reviewSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    rating: { type: Number, required: true },
+    comment: { type: String },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
   },
+  { timestamps: true }
+);
 
-  address: {
-    type: String,
-    required: true,
-  },
+const rentalSchema = mongoose.Schema(
+  {
+    propertyType: {
+      type: String,
+      required: false,
+    },
 
-  roomNumber: {
-    type: String,
-    required: true,
-  },
-
-  assets: {
-    type: String,
-    required: true,
-  },
-
-  price: {
-    type: Number,
-    required: true,
-  },
-
-  propertyPhotos: [
-    {
+    address: {
       type: String,
       required: true,
     },
-  ],
 
-  rating: {
-    type: Number,
-    required: false,
-  },
+    roomNumber: {
+      type: String,
+      required: true,
+    },
 
-  landlord: {
-    type: mongoose.Schema.Types.ObjectId,
-    // required: true,
-    ref: "User",
+    assets: {
+      type: String,
+      required: true,
+    },
+
+    price: {
+      type: Number,
+      required: true,
+    },
+
+    propertyPhotos: [
+      {
+        type: String,
+        required: true,
+      },
+    ],
+    landlord: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    reviews: [reviewSchema],
+    ratings: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    numReviews: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
-});
+  { timestamps: true }
+);
 
 const Rental = mongoose.model("Rental", rentalSchema);
 module.exports = Rental;
