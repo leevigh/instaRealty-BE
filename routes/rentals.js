@@ -2,10 +2,12 @@ var express = require('express');
 var router = express.Router();
 const auth = require('../middleware/auth');
 const User = require('../models/User');
-const { getRentals, createRental, edit_rental, delete_rental } = require('../controllers/rentals');
+const { getRentals, getRental, createRental, edit_rental, delete_rental } = require('../controllers/rentals');
 const upload = require('../configs/multer')
 
 router.get('/', getRentals);
+
+router.get('/:id', getRental);
 
 router.post('/', auth, upload.single('propertyPhotos'), createRental)
 
