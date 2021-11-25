@@ -40,10 +40,11 @@ module.exports = {
   },
 
   // create rentals
+  //============== create rentals=============
   createRental: async (req, res, next) => {
     let propertyPhotos;
     if (req.file) {
-      console.log("this is file======>", req.file);
+      // console.log("this is file======>", req.file);
       await cloudinaryConfig;
       const uploading = await cloudinary.uploader.upload(req.file.path);
       //   console.log(uploading);
@@ -72,7 +73,7 @@ module.exports = {
     );
   },
 
-  //   update rentals
+  //==============update rentals=======================
   edit_rental: async (req, res) => {
     let rentalId = req.params.rentalId;
     // console.log("ID========>", rentalId);
@@ -102,7 +103,7 @@ module.exports = {
     });
   },
 
-  // delete rental
+  //====================delete rental======================
   delete_rental: async (req, res) => {
     const id = req.params.rentalId;
     Rental.findById(id).then((rental) => {
@@ -126,5 +127,37 @@ module.exports = {
         );
       }
     });
+  },
+
+  //================rental review and rating=================
+  review_rental: async (req, res) => {
+    const { rating, comment } = req.body;
+    const rental = await Rental.findById(req.params.rentalId);
+    if (
+      rental.reviews.filter(
+        (rev) => rev.user.toString() === req.user.id.toString()
+      ).length > 0
+    ) {
+      res.status(400).json({ msg: "Rental already reviewed" });
+    } else {
+      const review = {
+        name: req.user.name,
+        rating: Number(rating),
+        comment,
+        user: req.user.id,
+      };
+      rental.reviews.push(review); //push new review into rental reviews array
+      rental.numReviews = rental.reviews.length; //set total number of reviews(numReviews) to length of reviews array
+      rental.ratings =
+        rental.reviews.reduce(
+          (acc, currentItem) => currentItem.rating + acc,
+          0
+        ) / rental.reviews.length; //set rental ratings to sum of review.rating in reviews array divide by total number of reviews
+      await rental.save();
+      res.status(201).json({
+        msg: "Review added",
+        rental,
+      });
+    }
   },
 };
