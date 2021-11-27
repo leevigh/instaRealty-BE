@@ -86,6 +86,7 @@ module.exports = {
       price: req.body.price,
       propertyPhotos,
       landlord: req.user.id,
+      coordinates: imageData.GPSPosition
     });
 
     if (!rental)
