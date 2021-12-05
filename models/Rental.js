@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const reviewSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
-    rating: { type: Number, required: true },
+    rating: { type: Number, required: false },
     comment: { type: String },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -51,7 +51,11 @@ const rentalSchema = mongoose.Schema(
 
     coordinates: {
       type: String,
-      required: true
+      required: false
+    },
+    pluscode: {
+      type: String,
+      required: false
     },
 
     // propertyPhotos: [
@@ -68,17 +72,21 @@ const rentalSchema = mongoose.Schema(
     reviews: [reviewSchema],
     ratings: {
       type: Number,
-      required: true,
-      default: 0,
+      required: false,
+      // default: 0,
     },
     numReviews: {
       type: Number,
-      required: true,
+      required: false,
       default: 0,
     },
   },
   { timestamps: true }
 );
+
+// rentalSchema.virtual('ratings').get(function() {
+//   return this.ratings > 0 ? this.ratings : 0
+// })
 
 const Rental = mongoose.model("Rental", rentalSchema);
 module.exports = Rental;

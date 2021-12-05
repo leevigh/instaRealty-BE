@@ -4,6 +4,7 @@ const Rental = require("../models/Rental");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const exiftool = require("exiftool-vendored").exiftool;
+const OpenLocationCode = require('open-location-code').OpenLocationCode
 const cloudinary = require("cloudinary").v2;
 const { cloudinaryConfig } = require("../configs/cloudinary");
 
@@ -48,6 +49,8 @@ module.exports = {
   //============== create rentals=============
   createRental: async (req, res, next) => {
     let propertyPhotos;
+    let imageData;
+    let code;
     if (req.file) {
       console.log("this is file======>", req.file);
 
@@ -59,13 +62,20 @@ module.exports = {
       // .read(req.file.path)
       // .then(tags => console.log(tags))
 
-      const imageData = await exiftool.read(req.file.path)
+      imageData = await exiftool.read(req.file.path)
       
       //exporting the coordinates to be used later to get address string
       module.exports = {photoGPS: imageData && imageData.GPSPosition ? imageData.GPSPosition : null}
 
       if(imageData && imageData.GPSPosition) {
         console.log(imageData.GPSPosition);
+        console.log(typeof imageData.GPSPosition);
+        const latlng = imageData.GPSPosition.split(" ")
+        console.log(latlng)
+        const openLocationCode = new OpenLocationCode()
+        code = openLocationCode.encode(parseFloat(latlng[0]), parseFloat(latlng[1]))
+
+
         await cloudinaryConfig;
         const uploading = await cloudinary.uploader.upload(req.file.path);
         //   console.log(uploading);
@@ -78,6 +88,7 @@ module.exports = {
       }
 
     }
+    console.log(imageData.GPSPosition)
     const rental = new Rental({
       propertyType: req.body.propertyType,
       address: req.body.address,
@@ -86,7 +97,8 @@ module.exports = {
       price: req.body.price,
       propertyPhotos,
       landlord: req.user.id,
-      coordinates: imageData.GPSPosition
+      coordinates: imageData.GPSPosition,
+      pluscode: code
     });
 
     if (!rental)
@@ -161,7 +173,7 @@ module.exports = {
   //================rental review and rating=================
   review_rental: async (req, res) => {
     const { rating, comment } = req.body;
-    const rental = await Rental.findById(req.params.rentalId);
+    const rental = await Rental.findById(req.params.id);
     if (
       rental.reviews.filter(
         (rev) => rev.user.toString() === req.user.id.toString()
@@ -171,21 +183,16 @@ module.exports = {
     } else {
       const review = {
         name: req.user.name,
-        rating: Number(rating),
+        rating: rating,
         comment,
         user: req.user.id,
       };
       rental.reviews.push(review); //push new review into rental reviews array
       rental.numReviews = rental.reviews.length; //set total number of reviews(numReviews) to length of reviews array
-      rental.ratings =
-        rental.reviews.reduce(
-          (acc, currentItem) => currentItem.rating + acc,
-          0
-        ) / rental.reviews.length; //set rental ratings to sum of review.rating in reviews array divide by total number of reviews
+      rental.ratings = rental.reviews.reduce((acc, currentItem) => currentItem.rating + acc,0) / rental.reviews.length; //set rental ratings to sum of review.rating in reviews array divide by total number of reviews
       await rental.save();
       res.status(201).json({
-        msg: "Review added",
-        rental,
+        msg: "Review added"
       });
     }
   },
