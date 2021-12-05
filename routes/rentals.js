@@ -13,7 +13,7 @@ router.post("/", auth, upload.single("propertyPhotos"), createRental);
 
 router.patch("/edit/:rentalId", auth, edit_rental);
 
-router.post("/review/:rentalId", auth, review_rental);
+router.post("/:id/review", auth, review_rental);
 
 router.delete("/delete/:rentalId", auth, delete_rental);
 
