@@ -17,6 +17,17 @@ const reviewSchema = mongoose.Schema(
   { timestamps: true }
 );
 
+const rentOrder = mongoose.Schema({
+  stripeToken: {
+    type: String,
+    required: true
+  },
+  amountPaid: {
+    type: Number,
+    required: true
+  },
+});
+
 const rentalSchema = mongoose.Schema(
   {
     propertyType: {
