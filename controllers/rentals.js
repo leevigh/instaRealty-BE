@@ -7,6 +7,7 @@ const exiftool = require("exiftool-vendored").exiftool;
 const OpenLocationCode = require('open-location-code').OpenLocationCode
 const cloudinary = require("cloudinary").v2;
 const { cloudinaryConfig } = require("../configs/cloudinary");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_TEST);
 
 const handleError = (err, res) => {
   res.status(500).contentType('text/plain').end('Oops! Something went wrong')
@@ -196,4 +197,31 @@ module.exports = {
       });
     }
   },
+
+  rentPay: async (req, res, next) => {
+    console.log("stripe-routes.js 9 | route reached", req.body);
+    let { amount, id } = req.body;
+    console.log("stripe-routes.js 10 | amount and id", amount, id);
+    try {
+      const payment = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "USD",
+        description: "InstaRealty LLC",
+        payment_method: id,
+        confirm: true,
+      });
+      
+      console.log("stripe-routes.js 19 | payment", payment);
+      res.json({
+        message: "Payment Successful",
+        success: true,
+      });
+    } catch (error) {
+      console.log("stripe-routes.js 17 | error", error);
+      res.json({
+        message: "Payment Failed",
+        success: false,
+      });
+    }
+  }
 };

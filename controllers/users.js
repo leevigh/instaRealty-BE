@@ -149,6 +149,7 @@ module.exports = {
               role: role.role,
               token: token,
               name: user[0].name,
+	      id: user[0]._id
             });
           } else {
             res.status(401).json({
