@@ -15,7 +15,7 @@ var index = require('./routes/index')
 mongoose.Promise = Promise;
 
 // 'mongodb://localhost:27017/instarealty'
-mongoose.connect('mongodb://localhost:27017/instarealty', {
+mongoose.connect(`${process.env.MONGODB_URL}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
