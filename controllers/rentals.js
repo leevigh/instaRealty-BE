@@ -200,28 +200,50 @@ module.exports = {
 
   rentPay: async (req, res, next) => {
     console.log("stripe-routes.js 9 | route reached", req.body);
-    let { amount, id } = req.body;
-    console.log("stripe-routes.js 10 | amount and id", amount, id);
-    try {
-      const payment = await stripe.paymentIntents.create({
-        amount: amount,
-        currency: "USD",
-        description: "InstaRealty LLC",
-        payment_method: id,
-        confirm: true,
-      });
-      
-      console.log("stripe-routes.js 19 | payment", payment);
-      res.json({
-        message: "Payment Successful",
-        success: true,
-      });
-    } catch (error) {
-      console.log("stripe-routes.js 17 | error", error);
-      res.json({
-        message: "Payment Failed",
-        success: false,
-      });
-    }
+    // let { amount, id } = req.body;
+    let productId = req.params.id;
+    Rental.findById(productId)
+    .then(rental => {
+      if(!rental) {
+        res.status(404).json({
+          message: "No rental found for given ID"
+        })
+      } else {
+        console.log(req.user)
+        console.log("stripe-routes.js 10 | amount and id", amount, id);
+        try {
+          const payment = stripe.paymentIntents.create({
+            amount: rental.price,
+            currency: "NGN",
+            description: "InstaRealty LLC",
+            payment_method: {
+              id: productId,
+              email: req.user.email
+            },
+            confirm: true,
+            receipt_email: req.user.email
+          });
+          
+          console.log("stripe-routes.js 19 | payment", payment);
+          res.json({
+            message: "Payment Successful",
+            success: true,
+          });
+        } catch (error) {
+          console.log("stripe-routes.js 17 | error", error);
+          res.json({
+            message: "Payment Failed",
+            success: false,
+          });
+        }
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        message: `${error.message}`
+      })
+    })
+
+    
   }
 };
