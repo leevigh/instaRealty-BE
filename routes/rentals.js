@@ -18,6 +18,6 @@ router.post("/:id/review", auth, review_rental);
 
 router.delete("/delete/:rentalId", auth, delete_rental);
 
-router.post("/rent/payment", auth, rentPay);
+router.post("/rent/:id/payment", auth, rentPay);
 
 module.exports = router;
