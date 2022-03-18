@@ -3,7 +3,7 @@ var router = express.Router();
 const cors = require('cors');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
-const { getRentals, getRental, createRental, edit_rental, delete_rental, review_rental, rentPay } = require('../controllers/rentals');
+const { getRentals, getRental, createRental, edit_rental, delete_rental, review_rental, paymentInfo, verifyPayment } = require('../controllers/rentals');
 const upload = require('../configs/multer');
 
 router.get('/', getRentals);
@@ -18,6 +18,8 @@ router.post("/:id/review", auth, review_rental);
 
 router.delete("/delete/:rentalId", auth, delete_rental);
 
-router.post("/:id/payment", auth, rentPay);
+router.post("/initialize/:id", auth, paymentInfo)
+
+router.post("/verify/:id/:reference", auth, verifyPayment);
 
 module.exports = router;
