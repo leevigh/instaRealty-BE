@@ -234,6 +234,7 @@ module.exports = {
   verifyPayment: async (req, res, next) => {
     const rental = req.params.id;
     const ref = req.params.reference;
+    const userId = req.user.id;
 
     try {
       return verifyPayment(ref, async(error, body) => {
@@ -248,7 +249,8 @@ module.exports = {
 
       })
     } catch (error) {
-      
+      console.log(error)
+      return res.status(500).json({error})
     }
   }
 };

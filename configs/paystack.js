@@ -34,7 +34,25 @@ const paystack = (request) => {
         request(options, callbackFn)
     }
 
-    return { initializePayment, verifyPayment }
+    const createSubaccount = (form, callback) => {
+        const options = {
+            url: `https://api.paystack.co/subaccount`,
+            headers: {
+                authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                'content-type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'cache-control': 'no-cache'
+            },
+            form
+        }
+
+        const callbackFn = (error, response, body) => {
+            return callback(error, body)
+        }
+        request(options, callbackFn)
+    }
+
+    return { initializePayment, verifyPayment, createSubaccount }
 }
 
 module.exports = paystack;
