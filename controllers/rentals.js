@@ -7,7 +7,9 @@ const exiftool = require("exiftool-vendored").exiftool;
 const OpenLocationCode = require('open-location-code').OpenLocationCode
 const cloudinary = require("cloudinary").v2;
 const { cloudinaryConfig } = require("../configs/cloudinary");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_TEST);
+const request = require('request');
+const { initializePayment, verifyPayment } = require('../configs/paystack')(request)
+// const { response } = require("../app");
 
 const handleError = (err, res) => {
   res.status(500).contentType('text/plain').end('Oops! Something went wrong')
@@ -198,52 +200,57 @@ module.exports = {
     }
   },
 
-  rentPay: async (req, res, next) => {
-    console.log("stripe-routes.js 9 | route reached", req.body);
-    // let { amount, id } = req.body;
-    let productId = req.params.id;
-    Rental.findById(productId)
-    .then(rental => {
-      if(!rental) {
-        res.status(404).json({
-          message: "No rental found for given ID"
-        })
-      } else {
-        console.log(req.user)
-        console.log("stripe-routes.js 10 | amount and id", amount, id);
-        try {
-          const payment = stripe.paymentIntents.create({
-            amount: rental.price,
-            currency: "NGN",
-            description: "InstaRealty LLC",
-            payment_method: {
-              id: productId,
-              email: req.user.email
-            },
-            confirm: true,
-            receipt_email: req.user.email
-          });
-          
-          console.log("stripe-routes.js 19 | payment", payment);
-          res.json({
-            message: "Payment Successful",
-            success: true,
-          });
-        } catch (error) {
-          console.log("stripe-routes.js 17 | error", error);
-          res.json({
-            message: "Payment Failed",
-            success: false,
-          });
-        }
-      }
-    })
-    .catch(error => {
-      res.status(500).json({
-        message: `${error.message}`
-      })
-    })
+  paymentInfo: async (req, res) => {
+    const rentalId = req.params.id;
 
-    
+    try {
+      const { amount } = req.body;
+      const { email, name } = req.user;
+      const form = { email, amount, name }
+
+      return initializePayment(form, (error, body) => {
+        if(error) {
+          console.log("Error >>>", error);
+          return res.status(400).json({ error: `Payment initialization error`})
+        }
+
+        response = JSON.parse(body);
+        console.log("RESPONSE!!! ",response);
+
+        return res.json({
+          payment_redirect_url: response.data.authorization_url,
+          payment_reference_id: response.data.reference
+        })
+      })
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        error
+      })
+    }
+  },
+
+  verifyPayment: async (req, res, next) => {
+    const rental = req.params.id;
+    const ref = req.params.reference;
+    const userId = req.user.id;
+
+    try {
+      return verifyPayment(ref, async(error, body) => {
+        if(error) {
+          console.log(error);
+          return res.status(400).json({ error: "Error while verifying payment" })
+        }
+
+        response = JSON.parse(body);
+        console.log(response.data);
+        const { reference, amount, channel, currency, paid_at } = response.data;
+
+      })
+    } catch (error) {
+      console.log(error)
+      return res.status(500).json({error})
+    }
   }
 };
