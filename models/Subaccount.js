@@ -1,28 +1,28 @@
 const mongoose = require("mongoose");
 
 const subaccountSchema = mongoose.Schema({
-    subaccount_code: {
+    sid: { //subaccount object id, different from the id of this schema
         type: String,
-        required: false
-    },
-    business_name: {
-        type: String,
-        required: false
+        required: false,
     },
     account_number: {
         type: String,
         required: false
     },
-    settlement_bank: {
+    account_bank: {
         type: String,
         required: false
     },
-    description: {
+    full_name: {
         type: String,
         required: false
     },
-    percentage_charge: {
-        type: Number,
+    subaccount_id: {
+        type: String,
+        required: false
+    },
+    bank_name: {
+        type: String,
         required: false
     },
     owner: {

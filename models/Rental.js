@@ -59,7 +59,8 @@ const rentalSchema = mongoose.Schema(
     occupant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: false
+      required: true,
+      default: ''
     },
 
     propertyPhotos: {

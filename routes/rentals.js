@@ -20,6 +20,6 @@ router.delete("/delete/:rentalId", auth, delete_rental);
 
 router.post("/initialize/:id", auth, paymentInfo)
 
-router.post("/verify/:id/:reference", auth, verifyPayment);
+router.get("/verify/:id", auth, verifyPayment);
 
 module.exports = router;

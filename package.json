@@ -5,18 +5,21 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www",
+    "dev-mod": "node --experimental-modules app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Levi Francis",
   "dependencies": {
+    "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "~1.13.2",
     "cloudinary": "^1.27.1",
     "cookie-parser": "~1.3.5",
     "cors": "^2.8.5",
-    "dotenv": "^10.0.0",
     "exiftool-vendored": "^15.6.0",
     "express": "~4.13.1",
+    "flutterwave-node-v3": "^1.0.9",
+    "got": "^12.0.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.7",
     "morgan": "^1.10.0",
@@ -25,5 +28,8 @@
     "request": "^2.88.2",
     "stripe": "^8.191.0",
     "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0"
   }
 }

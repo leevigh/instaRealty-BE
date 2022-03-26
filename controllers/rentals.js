@@ -8,8 +8,14 @@ const OpenLocationCode = require('open-location-code').OpenLocationCode
 const cloudinary = require("cloudinary").v2;
 const { cloudinaryConfig } = require("../configs/cloudinary");
 const request = require('request');
-const { initializePayment, verifyPayment } = require('../configs/paystack')(request)
+// const { initializePayment, verifyPayment } = require('../configs/paystack')(request)
+const getSubaccount = require('../helpers/getSubaccount')
+const initializePayment = require('../configs/flutterwave')
 // const { response } = require("../app");
+
+const Flutterwave = require('flutterwave-node-v3')
+
+const flw = new Flutterwave(process.env.FLW_PUBLIC_KEY, process.env.FLW_SECRET_KEY);
 
 const handleError = (err, res) => {
   res.status(500).contentType('text/plain').end('Oops! Something went wrong')
@@ -202,26 +208,64 @@ module.exports = {
 
   paymentInfo: async (req, res) => {
     const rentalId = req.params.id;
+    let tx_ref = `instarealty-${req.params.id}`;
 
     try {
       const { amount } = req.body;
-      const { email, name } = req.user;
-      const form = { email, amount, name }
+      const { email, name, phonenumber } = req.body;
+      // const form = { email, amount, name }
+      let subaccount_id = getSubaccount(rentalId)
 
-      return initializePayment(form, (error, body) => {
-        if(error) {
-          console.log("Error >>>", error);
-          return res.status(400).json({ error: `Payment initialization error`})
-        }
+      const details = {
+        tx_ref,
+        amount,
+        redirect_url: `${process.env.DEVELOPMENT_URL}api/v1/rentals/verify/${rentalId}`,
+        currency: "NGN",
+        customer: {
+          email,
+          name,
+          phonenumber
+        },
+        subaccounts: [
+          {
+            id: subaccount_id
+          }
+        ]
+      }
 
-        response = JSON.parse(body);
-        console.log("RESPONSE!!! ",response);
-
-        return res.json({
-          payment_redirect_url: response.data.authorization_url,
-          payment_reference_id: response.data.reference
+      initializePayment(details)
+      .then(response => {
+        res.status(200).json({
+          status: response.status,
+          payment_url: response.data.link
         })
       })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json({
+          message: err
+        })
+      })
+
+      // res.status(200).json({
+      //   status: initializePayment(details).status,
+      //   payment_url: initializePayment(details).link
+      // })
+
+      // return initializePayment(form, (error, body) => {
+      //   if(error) {
+      //     console.log("Error >>>", error);
+      //     return res.status(400).json({ error: `Payment initialization error`})
+      //   }
+
+      //   response = JSON.parse(body);
+      //   console.log("RESPONSE!!! ",response);
+
+      //   return res.json({
+      //     payment_redirect_url: response.data.authorization_url,
+      //     payment_reference_id: response.data.reference
+      //   })
+      // })
 
     } catch (error) {
       console.log(error);
@@ -231,26 +275,51 @@ module.exports = {
     }
   },
 
-  verifyPayment: async (req, res, next) => {
-    const rental = req.params.id;
-    const ref = req.params.reference;
+  verifyPayment: async (req, res) => {
+    const rentalId = req.params.id;
+    const transaction_id = req.query.transaction_id;
+    const status = req.query.status;
     const userId = req.user.id;
 
-    try {
-      return verifyPayment(ref, async(error, body) => {
-        if(error) {
-          console.log(error);
-          return res.status(400).json({ error: "Error while verifying payment" })
-        }
+    if(status === "successful") {
+      const rental = await Rental.findById(rentalId)
+      const response = await flw.Transaction.verify({id: transaction_id})
 
-        response = JSON.parse(body);
-        console.log(response.data);
-        const { reference, amount, channel, currency, paid_at } = response.data;
+      if(
+        response.data.status === "successful" &&
+        response.data.amount === rental.price &&
+        response.data.currency === "NGN"
+      ) {
+          await Rental.findByIdAndUpdate({_id: rentalId}, {
+            rented: true,
+            occupant: userId
+          })
 
-      })
-    } catch (error) {
-      console.log(error)
-      return res.status(500).json({error})
+          return res.status(201).json({
+            message: "Payment Verified and Rental assigned"
+          })
+      } else {
+        return res.status(500).json({
+          message: "Payment Verification Failed"
+        })
+      }
     }
+
+    // try {
+    //   return verifyPayment(ref, async(error, body) => {
+    //     if(error) {
+    //       console.log(error);
+    //       return res.status(400).json({ error: "Error while verifying payment" })
+    //     }
+
+    //     response = JSON.parse(body);
+    //     console.log(response.data);
+    //     const { reference, amount, channel, currency, paid_at } = response.data;
+
+    //   })
+    // } catch (error) {
+    //   console.log(error)
+    //   return res.status(500).json({error})
+    // }
   }
 };
