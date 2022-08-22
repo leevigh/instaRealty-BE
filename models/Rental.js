@@ -3,26 +3,37 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const rentalSchema = mongoose.Schema({
-  propertyType: {
-    type: String,
-    required: false,
+const reviewSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    rating: { type: Number, required: false },
+    comment: { type: String },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
   },
+  { timestamps: true }
+);
 
-  address: {
+const rentOrder = mongoose.Schema({
+  stripeToken: {
     type: String,
-    required: true,
+    required: true
   },
+  amountPaid: {
+    type: Number,
+    required: true
+  },
+});
 
-  roomNumber: {
-    type: String,
-    required: true,
-  },
-
-  assets: {
-    type: String,
-    required: true,
-  },
+const rentalSchema = mongoose.Schema(
+  {
+    propertyType: {
+      type: String,
+      required: false,
+    },
 
   postalCode: {
     type: String,
@@ -50,28 +61,77 @@ const rentalSchema = mongoose.Schema({
     required: true,
   },
 
-  propertyPhotos: [
-    {
+    roomNumber: {
       type: String,
       required: true,
     },
-  ],
 
-  rating: {
-    type: Number,
-    required: false,
+    assets: {
+      type: String,
+      required: false
+    },
+
+    rented: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+
+    occupant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      default: ''
+    },
+
+    propertyPhotos: {
+      type: String,
+      required: true,
+    },
+
+    price: {
+      type: Number,
+      required: true,
+    },
+
+    coordinates: {
+      type: String,
+      required: false
+    },
+    pluscode: {
+      type: String,
+      required: false
+    },
+
+    // propertyPhotos: [
+    //   {
+    //     type: String,
+    //     required: true,
+    //   },
+    // ],
+    landlord: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    reviews: [reviewSchema],
+    ratings: {
+      type: Number,
+      required: false,
+      // default: 0,
+    },
+    numReviews: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
   },
-  landlord: {
-    type: Object,
-    required: true
-  }
+  { timestamps: true }
+);
 
-  // landlord: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   // required: true,
-  //   ref: "User",
-  // },
-});
+// rentalSchema.virtual('ratings').get(function() {
+//   return this.ratings > 0 ? this.ratings : 0
+// })
 
 const Rental = mongoose.model("Rental", rentalSchema);
 module.exports = Rental;

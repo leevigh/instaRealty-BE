@@ -1,7 +1,7 @@
 var express = require('express');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
-const {register, login, registerLL} = require('../controllers/users');
+const {register, login, registerLL, registerSubaccount} = require('../controllers/users');
 var router = express.Router();
 
 /* GET users listing. */
@@ -18,5 +18,6 @@ var router = express.Router();
 router.post('/register', register)
 router.post('/landlord/register', registerLL)
 router.post('/login', login)
+router.post('/subaccount/create', auth, registerSubaccount)
 
 module.exports = router;
