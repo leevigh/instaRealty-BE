@@ -9,7 +9,7 @@ router.get('/', getRentals);
 
 router.get('/:id', getRental);
 
-router.post('/', auth, upload.single('propertyPhotos'), createRental)
+router.post('/', auth, upload.array('propertyPhotos',6), createRental)
 
 router.patch("/edit/:rentalId", auth, edit_rental);
 

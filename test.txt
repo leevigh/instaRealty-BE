@@ -1,0 +1,97 @@
+{
+  id: 1692139442,
+  domain: 'test',
+  status: 'success',
+  reference: 'pacv3s28lv',
+  amount: 100000,
+  message: null,
+  gateway_response: 'Successful',
+  paid_at: '2022-03-17T23:05:27.000Z',
+  created_at: '2022-03-17T23:03:21.000Z',
+  channel: 'card',
+  currency: 'NGN',
+  ip_address: '105.112.50.11',
+  metadata: '',
+  log: {
+    start_time: 1647558260,
+    time_spent: 68,
+    attempts: 1,
+    errors: 0,
+    success: true,
+    mobile: false,
+    input: [],
+    history: [ [Object], [Object] ]
+  },
+  fees: 1500,
+  fees_split: null,
+  authorization: {
+    authorization_code: 'AUTH_ql668tbrb8',
+    bin: '408408',
+    last4: '4081',
+    exp_month: '12',
+    exp_year: '2030',
+    channel: 'card',
+    card_type: 'visa ',
+    bank: 'TEST BANK',
+    country_code: 'NG',
+    brand: 'visa',
+    reusable: true,
+    signature: 'SIG_os0sZ3SQzO9Qkl09KwvJ',
+    account_name: null
+  },
+  customer: {
+    id: 73738733,
+    first_name: null,
+    last_name: null,
+    email: 'babavoss@gmail.com',
+    customer_code: 'CUS_jpt7mmr82xu8lic',
+    phone: null,
+    metadata: null,
+    risk_action: 'default',
+    international_format_phone: null
+  },
+  plan: null,
+  split: {},
+  order_id: null,
+  paidAt: '2022-03-17T23:05:27.000Z',
+  createdAt: '2022-03-17T23:03:21.000Z',
+  requested_amount: 100000,
+  pos_transaction_data: null,
+  source: null,
+  fees_breakdown: null,
+  transaction_date: '2022-03-17T23:03:21.000Z',
+  plan_object: {},
+  subaccount: {}
+}
+
+//DATABASE STUFF
+"mongodb+srv://leevigh:adminLee15@primarycluster.yiycz.mongodb.net/instaRealtyDB?retryWrites=true&w=majority&ssl=true",
+
+//FLUTTERWAVE STUFF
+FLW_PUBLIC_KEY=FLWPUBK_TEST-e1be9a86741c18cea38127c4b5eea3b0-X
+FLW_SECRET_KEY=FLWSECK_TEST-3e3dcea0253ae0df8d51d53ff009f9a2-X
+
+{
+  "account_bank": "063",
+  "account_number": "0083967138",
+  "business_name": "fleshpotng",
+  "business_mobile": "07052840784"
+}
+
+{
+  "account_bank": "044",
+  "account_number": "0690000034",
+  "business_name": "PremHousing",
+  "business_mobile": "08084600075",
+  "business_email": "francisking151@gmail.com",
+  "business_contact": "08084600075",
+  "business_contact_mobile": "08084600075"
+}
+
+// Initialize payment details
+{
+  "amount": "120000",
+  "email": "francisking151@gmail.com",
+  "name": "Baba Voss",
+  "phonenumber": "08084600075"
+}

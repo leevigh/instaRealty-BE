@@ -24,6 +24,27 @@ const rentalSchema = mongoose.Schema({
     required: true,
   },
 
+  postalCode: {
+    type: String,
+    required: false,
+  },
+
+  city: {
+    type: String,
+    required: true,
+  },
+
+  isAvailable: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+
+  description: {
+    type: String,
+    required: false,
+  },
+
   price: {
     type: Number,
     required: true,
@@ -40,12 +61,16 @@ const rentalSchema = mongoose.Schema({
     type: Number,
     required: false,
   },
-
   landlord: {
-    type: mongoose.Schema.Types.ObjectId,
-    // required: true,
-    ref: "User",
-  },
+    type: Object,
+    required: true
+  }
+
+  // landlord: {
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   // required: true,
+  //   ref: "User",
+  // },
 });
 
 const Rental = mongoose.model("Rental", rentalSchema);
