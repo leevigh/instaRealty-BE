@@ -8,9 +8,10 @@ const morgan = require('morgan')
 const cors = require('cors')
 
 
-var users = require('./routes/users');
-var rentals = require('./routes/rentals');
-var index = require('./routes/index')
+let users = require('./routes/users');
+let rentals = require('./routes/rentals');
+let bookings = require('./routes/bookings')
+let index = require('./routes/index')
 
 mongoose.Promise = Promise;
 
@@ -33,5 +34,6 @@ app.use(cookieParser())
 app.use('/', index)
 app.use('/api/v1/users', users);
 app.use('/api/v1/rentals', rentals);
+app.use('/api/v1/bookings', bookings)
 
 module.exports = app;
