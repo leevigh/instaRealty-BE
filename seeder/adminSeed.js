@@ -18,8 +18,8 @@ mongoose.connect('mongodb://localhost:27017/instarealty', {
 
 const admin = new User({
     name: 'Levi Francis',
-    email: 'francisking151@gmail.com',
-    password: '123456',
+    email: process.env.SEEDER_EMAIL,
+    password: process.env.SEEDER_PASSWORD,
     role: 'admin'
 });
 
