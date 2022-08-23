@@ -71,23 +71,25 @@ const rentalSchema = mongoose.Schema(
       required: false
     },
 
-    rented: {
-      type: Boolean,
-      default: false,
-      required: true,
-    },
+    // rented: {
+    //   type: Boolean,
+    //   default: false,
+    //   required: true,
+    // },
 
     occupant: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Object,
       ref: "User",
       required: true,
       default: ''
     },
 
-    propertyPhotos: {
-      type: String,
-      required: true,
-    },
+    propertyPhotos: [
+      {
+        type: String,
+        required: true,
+      }
+    ],
 
     price: {
       type: Number,
@@ -103,14 +105,8 @@ const rentalSchema = mongoose.Schema(
       required: false
     },
 
-    // propertyPhotos: [
-    //   {
-    //     type: String,
-    //     required: true,
-    //   },
-    // ],
     landlord: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Object,
       required: true,
       ref: "User",
     },
