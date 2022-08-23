@@ -110,17 +110,74 @@ module.exports = {
       pluscode: code
     });
 
-    if (!rental)
+    if(req.file && req.file.path) { //if only one image uploaded
+      await cloudinaryConfig;
+      const uploading = await cloudinary.uploader.upload(req.file.path);
+
+      propertyPhotos = uploading.secure_url;
+
+      const rental = new Rental({
+        propertyType: req.body.propertyType,
+        postalCode: req.body.postalCode,
+        city: req.body.city,
+        description: req.body.description,
+        address: req.body.address,
+        roomNumber: req.body.roomNumber,
+        assets: req.body.assets,
+        price: req.body.price,
+        propertyPhotos,
+        landlord: req.user,
+      });
+
+      if (!rental)
       return res
         .status(500)
         .json({ success: false, msg: "error in creating rental" });
 
-    rental.save().then((rental) =>
-      res.status(201).json({
-        success: true,
-        rental,
-      })
-    );
+      rental.save()
+      .then((rental) =>
+        res.status(201).json({
+          success: true,
+          rental,
+        })
+      ).catch(error => {
+        console.error("Error creating rental >>", error)
+        res.status(500).json({
+          error: error
+        })
+      });
+    }
+
+    // const rental = new Rental({
+    //   propertyType: req.body.propertyType,
+    //   postalCode: req.body.postalCode,
+    //   city: req.body.city,
+    //   description: req.body.description,
+    //   address: req.body.address,
+    //   roomNumber: req.body.roomNumber,
+    //   assets: req.body.assets,
+    //   price: req.body.price,
+    //   propertyPhotos,
+    //   landlord: req.user,
+    // });
+
+    // if (!rental)
+    //   return res
+    //     .status(500)
+    //     .json({ success: false, msg: "error in creating rental" });
+
+    // rental.save()
+    // .then((rental) =>
+    //   res.status(201).json({
+    //     success: true,
+    //     rental,
+    //   })
+    // ).catch(error => {
+    //   console.error("Error creating rental >>", error)
+    //   res.status(500).json({
+    //     error: error
+    //   })
+    // });
   },
 
   //==============update rentals=======================

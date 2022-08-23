@@ -35,10 +35,31 @@ const rentalSchema = mongoose.Schema(
       required: false,
     },
 
-    address: {
-      type: String,
-      required: true,
-    },
+  postalCode: {
+    type: String,
+    required: false,
+  },
+
+  city: {
+    type: String,
+    required: true,
+  },
+
+  isAvailable: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+
+  description: {
+    type: String,
+    required: false,
+  },
+
+  price: {
+    type: Number,
+    required: true,
+  },
 
     roomNumber: {
       type: String,
