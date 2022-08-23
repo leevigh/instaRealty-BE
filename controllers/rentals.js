@@ -60,8 +60,13 @@ module.exports = {
     let propertyPhotos;
     let imageData;
     let code;
-    if (req.file) {
-      console.log("this is file======>", req.file);
+    let photoURIs = [];
+    const cloudinary_secure_urls = []; // array to hold the secure url from cloudinary after uploading
+
+    // console.log("FILESSS", req.files)
+    
+    if (req.files) {
+      console.log("this is file======>", req.files);
 
       const exif = async () => {
         console.log(await exiftool.version())
@@ -71,8 +76,8 @@ module.exports = {
       // .read(req.file.path)
       // .then(tags => console.log(tags))
 
-      imageData = await exiftool.read(req.file.path)
-      
+      imageData = await exiftool.read(req.files[0].path) // only read the exif data of the first item
+
       //exporting the coordinates to be used later to get address string
       module.exports = {photoGPS: imageData && imageData.GPSPosition ? imageData.GPSPosition : null}
 
@@ -83,101 +88,105 @@ module.exports = {
         console.log(latlng)
         const openLocationCode = new OpenLocationCode()
         code = openLocationCode.encode(parseFloat(latlng[0]), parseFloat(latlng[1]))
+  
+        //loop through the array of file uploads and store the path in an array to send to cloudinary
+        const files = req.files
+        for(const file of files) {
+          const { path } = file;
+          photoURIs.push(path)
+
+          const secure_url = await cloudinary.uploader.upload(path)
+          // const uploading = await cloudinary.uploader.upload(uri)
+          cloudinary_secure_urls.push(secure_url.secure_url)
+        }
 
 
         await cloudinaryConfig;
-        const uploading = await cloudinary.uploader.upload(req.file.path);
-        //   console.log(uploading);
-        propertyPhotos = uploading.secure_url;
+// LEAVING THESE COMMENTS IN TO REMIND ME OF MISTAKE
+        // photoURIs.forEach(async uri => {
+        //   console.log("URIs>>", uri);
+
+        //     const uploading = await cloudinary.uploader.upload(uri)
+        //     .then(async photo => {
+        //       console.log("FROM CLOUD.", photo);
+        //       cloudinary_secure_urls.push(photo.secure_url)
+        //     })
+        //     .catch(error => {
+        //       console.error("THIS ERROR",error)
+        //     });
+        //   // cloudinary_secure_urls.push(uploading.secure_url)
+        // })
+        // const uploading = await cloudinary.uploader.upload(photoURIs);
+          // console.log(cloudinary_secure_urls);
+        // propertyPhotos = uploading.secure_url;
+        console.log(cloudinary_secure_urls);
       } else {
         //code 406 - Not acceptable
         return res.status(406).json({
           message: "Photo has no GPS data. Switch on GPS in camera."
         })
       }
+    }
+
+
+    //if only one image uploaded
+    if(req.file && req.file.path) {
+
+      imageData = await exiftool.read(req.file.path)
+  
+       //exporting the coordinates to be used later to get address string
+        module.exports = {photoGPS: imageData && imageData.GPSPosition ? imageData.GPSPosition : null}
+
+        if(imageData && imageData.GPSPosition) {
+          console.log(imageData.GPSPosition);
+          console.log(typeof imageData.GPSPosition);
+          const latlng = imageData.GPSPosition.split(" ")
+          console.log(latlng)
+          const openLocationCode = new OpenLocationCode()
+          code = openLocationCode.encode(parseFloat(latlng[0]), parseFloat(latlng[1]))
+
+          await cloudinaryConfig;
+          const uploading = await cloudinary.uploader.upload(req.file.path);
+          propertyPhotos = uploading.secure_url;
+        }
 
     }
+
     console.log(imageData.GPSPosition)
-    const rental = new Rental({
-      propertyType: req.body.propertyType,
-      address: req.body.address,
-      roomNumber: req.body.roomNumber,
-      assets: req.body.assets,
-      price: req.body.price,
-      propertyPhotos,
-      landlord: req.user.id,
-      coordinates: imageData.GPSPosition,
-      pluscode: code
-    });
-
-    if(req.file && req.file.path) { //if only one image uploaded
-      await cloudinaryConfig;
-      const uploading = await cloudinary.uploader.upload(req.file.path);
-
-      propertyPhotos = uploading.secure_url;
 
       const rental = new Rental({
         propertyType: req.body.propertyType,
+        address: req.body.address,
         postalCode: req.body.postalCode,
         city: req.body.city,
         description: req.body.description,
-        address: req.body.address,
         roomNumber: req.body.roomNumber,
         assets: req.body.assets,
         price: req.body.price,
-        propertyPhotos,
+        propertyPhotos: cloudinary_secure_urls,
+        coordinates: imageData.GPSPosition,
+        pluscode: code,
         landlord: req.user,
       });
-
-      if (!rental)
+    
+    if (!rental)
       return res
         .status(500)
         .json({ success: false, msg: "error in creating rental" });
 
-      rental.save()
-      .then((rental) =>
-        res.status(201).json({
-          success: true,
-          rental,
-        })
-      ).catch(error => {
-        console.error("Error creating rental >>", error)
-        res.status(500).json({
-          error: error
-        })
-      });
-    }
-
-    // const rental = new Rental({
-    //   propertyType: req.body.propertyType,
-    //   postalCode: req.body.postalCode,
-    //   city: req.body.city,
-    //   description: req.body.description,
-    //   address: req.body.address,
-    //   roomNumber: req.body.roomNumber,
-    //   assets: req.body.assets,
-    //   price: req.body.price,
-    //   propertyPhotos,
-    //   landlord: req.user,
-    // });
-
-    // if (!rental)
-    //   return res
-    //     .status(500)
-    //     .json({ success: false, msg: "error in creating rental" });
-
-    // rental.save()
-    // .then((rental) =>
-    //   res.status(201).json({
-    //     success: true,
-    //     rental,
-    //   })
-    // ).catch(error => {
-    //   console.error("Error creating rental >>", error)
-    //   res.status(500).json({
-    //     error: error
-    //   })
-    // });
+    rental.save()
+    .then((rental) =>
+      res.status(201).json({
+        success: true,
+        rental,
+      })
+    ).catch(error => {
+      console.error("Error creating rental >>", error)
+      res.status(500).json({
+        error: error
+      })
+    });
+    
   },
 
   //==============update rentals=======================
