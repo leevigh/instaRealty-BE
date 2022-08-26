@@ -2,13 +2,26 @@ var express = require("express");
 var router = express.Router();
 const cors = require('cors');
 const auth = require('../middleware/auth');
-const User = require('../models/User');
-const { getRentals, getRental, createRental, edit_rental, delete_rental, review_rental, paymentInfo, verifyPayment } = require('../controllers/rentals');
+const { 
+    getRentals, 
+    getRentedProperty,
+    getOwnerProperty,
+    getRental, 
+    createRental, 
+    edit_rental, 
+    delete_rental, 
+    review_rental, 
+    paymentInfo, 
+    verifyPayment } = require('../controllers/rentals');
 const upload = require('../configs/multer');
 
 router.get('/', getRentals);
 
-router.get('/:id', getRental);
+router.get('/rental/:id', getRental);
+
+router.get('/rented-property', auth, getRentedProperty);
+
+router.get('/owner-properties', auth, getOwnerProperty);
 
 router.post('/', auth, upload.any('propertyPhotos',6), createRental)
 
