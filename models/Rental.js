@@ -35,31 +35,37 @@ const rentalSchema = mongoose.Schema(
       required: false,
     },
 
-  postalCode: {
-    type: String,
-    required: false,
-  },
+    postalCode: {
+      type: String,
+      required: false,
+    },
 
-  city: {
-    type: String,
-    required: true,
-  },
+    city: {
+      type: String,
+      required: true,
+    },
 
-  isAvailable: {
-    type: Boolean,
-    required: true,
-    default: false
-  },
+    address: {
+      type: String,
+      required: true,
+      default: ''
+    },
 
-  description: {
-    type: String,
-    required: false,
-  },
+    isAvailable: {
+      type: Boolean,
+      required: true,
+      default: true
+    },
 
-  price: {
-    type: Number,
-    required: true,
-  },
+    description: {
+      type: String,
+      required: false,
+    },
+
+    price: {
+      type: Number,
+      required: true,
+    },
 
     roomNumber: {
       type: String,
@@ -71,17 +77,10 @@ const rentalSchema = mongoose.Schema(
       required: false
     },
 
-    // rented: {
-    //   type: Boolean,
-    //   default: false,
-    //   required: true,
-    // },
-
     occupant: {
-      type: Object,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
-      default: ''
+      required: false,
     },
 
     propertyPhotos: [
@@ -106,9 +105,9 @@ const rentalSchema = mongoose.Schema(
     },
 
     landlord: {
-      type: Object,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     reviews: [reviewSchema],
     ratings: {

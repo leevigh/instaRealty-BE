@@ -11,7 +11,6 @@ const request = require('request');
 // const { initializePayment, verifyPayment } = require('../configs/paystack')(request)
 const getSubaccount = require('../helpers/getSubaccount')
 const initializePayment = require('../configs/flutterwave')
-// const { response } = require("../app");
 
 const Flutterwave = require('flutterwave-node-v3')
 
@@ -54,6 +53,64 @@ module.exports = {
     })
   },
 
+  //Displays rental a user has paid for in their profile page
+  getRentedProperty: async (req, res, next) => {
+    const userId = req.user.id;
+
+    if(req.user.role === 'landlord') {
+      res.status(405).json({
+        success: false,
+        message: "You are not authorized to access this resource"
+      })
+    }
+
+
+    try {
+      Rental.find({occupant: userId, isAvailable: false})
+      .then(rental => {
+        res.status(200).json({
+          success: true,
+          data: rental
+        })
+      })
+      .catch(error => {
+        console.log("Get rented property error",error) // development
+        res.status(404).json({
+          success: false,
+          message: "There was an error while finding rentals",
+          error: error
+        })
+      })
+    } catch (error) {
+      console.log("HERE!!");
+      console.log("catch block error>>", error)
+    }
+    
+  },
+
+  //Display owner's rental in dashboard
+  getOwnerProperty: async (req, res) => {
+    const ownerId = req.user.id;
+
+    if(req.user.role === 'landlord') {
+      Rental.find({ landlord: ownerId })
+      .then(rental => {
+        res.status(200).json({
+          success: true,
+          data: rental
+        })
+      })
+      .catch(error => {
+        console.log("Error getting owner rental>", error) // development
+        res.status(404).json({
+          success: false,
+          message: "There was an error finding your rentals",
+          error: error
+        })
+      })
+    }
+  },
+
   // create rentals
   //============== create rentals=============
   createRental: async (req, res, next) => {
@@ -64,6 +121,8 @@ module.exports = {
     const cloudinary_secure_urls = []; // array to hold the secure url from cloudinary after uploading
 
     // console.log("FILESSS", req.files)
+
+    if(req.user.role !== "landlord") return res.status(403).json({message: "Unauthorized user"})
     
     if (req.files) {
       console.log("this is file======>", req.files);
@@ -166,7 +225,7 @@ module.exports = {
         propertyPhotos: cloudinary_secure_urls,
         coordinates: imageData.GPSPosition,
         pluscode: code,
-        landlord: req.user,
+        landlord: req.user.id,
       });
     
     if (!rental)
@@ -273,14 +332,14 @@ module.exports = {
   },
 
   paymentInfo: async (req, res) => {
-    const rentalId = req.params.id;
+    const rentalId = req.params.id; // id of the rental to be paid for
     let tx_ref = `instarealty-${req.params.id}`;
 
     try {
       const { amount } = req.body;
       const { email, name, phonenumber } = req.body;
       // const form = { email, amount, name }
-      let subaccount_id = getSubaccount(rentalId)
+      let subaccount_id = getSubaccount(rentalId) // subaccount of the owner of the rental to split payment with
 
       const details = {
         tx_ref,
@@ -357,7 +416,7 @@ module.exports = {
         response.data.currency === "NGN"
       ) {
           await Rental.findByIdAndUpdate({_id: rentalId}, {
-            rented: true,
+            isAvailable: false,
             occupant: userId
           })
 
