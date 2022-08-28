@@ -21,8 +21,8 @@ const handleError = (err, res) => {
 }
 
 module.exports = {
-  getRentals: (req, res, next) => {
-    Rental.find().then(result => res.status(200).json({
+  getRentals: async (req, res, next) => {
+    await Rental.find().then(result => res.status(200).json({
       data: result
     })).catch(error => {
       res.status(404).json({
