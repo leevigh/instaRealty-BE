@@ -19,9 +19,9 @@ router.get('/', getRentals);
 
 router.get('/rental/:id', getRental);
 
-router.get('/rented-property', auth, getRentedProperty);
+router.get('/renter/property', auth, getRentedProperty);
 
-router.get('/owner-properties', auth, getOwnerProperty);
+router.get('/owner/properties', auth, getOwnerProperty);
 
 router.post('/', auth, upload.any('propertyPhotos',6), createRental)
 
