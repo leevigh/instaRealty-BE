@@ -59,32 +59,33 @@ module.exports = {
     const userId = req.user.id;
 
     if(req.user.role === 'landlord') {
-      res.status(405).json({
+      return res.status(405).json({
         success: false,
         message: "You are not authorized to access this resource"
       })
     }
 
-
-    try {
-      Rental.find({occupant: userId, isAvailable: false})
-      .then(rental => {
-        res.status(200).json({
-          success: true,
-          data: rental
+    if(req.user.role === 'regular') {
+      try {
+        Rental.find({occupant: userId, isAvailable: false})
+        .then(rental => {
+          res.status(200).json({
+            success: true,
+            data: rental
+          })
         })
-      })
-      .catch(error => {
-        console.log("Get rented property error",error) // development
-        res.status(404).json({
-          success: false,
-          message: "There was an error while finding rentals",
-          error: error
+        .catch(error => {
+          console.log("Get rented property error",error) // development
+          res.status(404).json({
+            success: false,
+            message: "There was an error while finding rentals",
+            error: error
+          })
         })
-      })
-    } catch (error) {
-      console.log("HERE!!");
-      console.log("catch block error>>", error)
+      } catch (error) {
+        console.log("HERE!!");
+        console.log("catch block error>>", error)
+      }
     }
     
   },
